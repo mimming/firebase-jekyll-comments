@@ -1,0 +1,151 @@
+<script src='https://cdn.firebase.com/js/client/1.0.15/firebase.js'></script>
+<script src='https://ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js'></script>
+<script src="https://cdn.firebase.com/js/simple-login/1.6.2/firebase-simple-login.js"></script>
+<script>
+  //TODO: consider upgrading to something real like handlebar.js
+  // Simple JavaScript Templating
+  // John Resig - http://ejohn.org/ - MIT Licensed
+  (function(){
+    var cache = {};
+
+    this.tmpl = function tmpl(str, data){
+      // Figure out if we're getting a template, or if we need to
+      // load the template - and be sure to cache the result.
+      var fn = !/\W/.test(str) ?
+          cache[str] = cache[str] ||
+              tmpl(document.getElementById(str).innerHTML) :
+
+        // Generate a reusable function that will serve as a template
+        // generator (and which will be cached).
+          new Function("obj",
+                  "var p=[],print=function(){p.push.apply(p,arguments);};" +
+
+                // Introduce the data as local variables using with(){}
+                  "with(obj){p.push('" +
+
+                // Convert the template into pure JavaScript
+                  str
+                      .replace(/[\r\t\n]/g, " ")
+                      .split("<%").join("\t")
+                      .replace(/((^|%>)[^\t]*)'/g, "$1\r")
+                      .replace(/\t=(.*?)%>/g, "',$1,'")
+                      .split("\t").join("');")
+                      .split("%>").join("p.push('")
+                      .split("\r").join("\\'")
+                  + "');}return p.join('');");
+
+      // Provide some basic currying to the user
+      return data ? fn( data ) : fn;
+    };
+  })();
+</script>
+<script>
+  $(document).ready(function () {
+    // Load up useful information from site and page variables
+    var firebase = "{{site.comments-firebase}}";
+    var postId = "{{page.id || default | replace '/','-'}}";
+    var blogName = "{{site.name || default}}";
+
+    var fb = new Firebase(firebase + blogName);
+    var fbPostComments = fb.child(postId);
+    var fbPostCommentCount = fb.child("comment-counts/" + postId);
+
+    var currentUser = null;
+
+    // init Auth
+    var auth = new FirebaseSimpleLogin(fb, function (error, user) {
+      if (error) {
+        // An error occurred while attempting login
+        console.log(error);
+      } else if (user) {
+        currentUser = user;
+        // User authenticated with Firebase
+
+        // Store user data in Firebase so we can display it on the comments
+        fb.child('users').child(user.uid).set({
+          displayName: user.displayName,
+          provider: user.provider,
+          provider_id: user.id
+        });
+        //TODO: Get profile photo
+        //TODO: get profile URL
+
+        $("#fbc-login-buttons").hide();
+        $("#fbc-comment-form").show();
+      } else {
+        // User is logged out
+        currentUser = null;
+
+        $("#fbc-login-buttons").show();
+        $("#fbc-comment-form").hide();
+      }
+    });
+
+    // Handle login
+    $('#fbc-login-google').click(function (event) {
+      auth.login('google', {
+        rememberMe: true,
+        scope: 'https://www.googleapis.com/auth/plus.login'
+      });
+    });
+
+    $('#fbc-login-facebook').click(function (event) {
+      auth.login('facebook', { rememberMe: true });
+    });
+
+    $('#fbc-login-github').click(function (event) {
+      auth.login('github', { rememberMe: true });
+    });
+
+    $('#fbc-logout').click(function (event) {
+      auth.logout();
+    });
+
+    // Handle insertions
+    $('#fbc-comment-form-submit').click(function (event) {
+      var comment = $("#fbc-comment-message").val();
+
+      //Strip the html for XSS protection
+      // TODO: (also enforce this on the database)
+      //TODO: there has to be a cleaner way to do this
+      var cleanComment = $("<div/>").html(comment).text();
+      fbPostComments.push({'uid': currentUser.uid, 'comment': comment});
+
+      fbPostCommentCount.transaction(function (current_value) {
+        return (current_value || 0) + 1;
+      });
+    });
+
+    // Display existing and future comments
+    fbPostComments.on('child_added', function (snapshot) {
+      var message = snapshot.val();
+      var messageComment = message.comment;
+      // TODO: Replace newlines with line breaks
+      messageComment = messageComment.replace(/\n/g, "<br />");
+
+      fb.child("users/" + message.uid).once('value', function (userSnap) {
+        var user = userSnap.val();
+        var userName = user ? user.displayName : "anonymous";
+        var profileImageUrl = "https://lh4.googleusercontent.com/-yth5HLY4Qi4/AAAAAAAAAAI/AAAAAAADCvU/hXAqMsRa8rA/photo.jpg?sz=50";
+        var profileUrl = "http://google.com/+JennyMurphy";
+
+
+        // this is not working with an id reference to a template (possibly because it's 6 year old code), so give it the html instead
+        var commentHtml = tmpl($("#fbc-comment-template").html(), {
+          comment: messageComment,
+          userName: userName,
+          profileImageUrl: profileImageUrl,
+          profileUrl: profileUrl
+        });
+
+        $("#fbc-comments-list").append(commentHtml);
+      })
+    });
+
+  });
+</script>
+<script type="application/vnd.fbc-template" id="fbc-comment-template">
+  {% include firebase-comment-template.html %}
+</script>
+
+{% include firebase-comment-form-template.html %}

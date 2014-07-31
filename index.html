@@ -1,0 +1,34 @@
+<html>
+<head>
+  <script src='https://cdn.firebase.com/js/client/1.0.15/firebase.js'></script>
+  <script src='https://ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js'></script>
+</head>
+<body>
+<dl id='messages'></dl>
+
+<input type='text' id='nameInput' placeholder='Name'>
+<input type='text' id='messageInput' placeholder='Message'>
+<script>
+  var postId = "mypost"
+  var myDataRef = new Firebase('https://blogcomments.firebaseio.com/' + postId);
+  $('#messageInput').keypress(function (e) {
+    if (e.keyCode == 13) {
+      var name = $('#nameInput').val();
+      var text = $('#messageInput').val();
+      myDataRef.push({name: name, text: text});
+      $('#messageInput').val('');
+    }
+  });
+
+  myDataRef.on('child_added', function (snapshot) {
+    var message = snapshot.val();
+    displayChatMessage(message.name, message.text);
+  });
+  function displayChatMessage(name, text) {
+    $("#messages").append($('<dt>').text(name), $('<dd>').text(text));
+    $('#messages')[0].scrollTop = $('#messages')[0].scrollHeight;
+  }
+
+</script>
+</body>
+</html>
