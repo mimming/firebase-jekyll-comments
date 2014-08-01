@@ -3,7 +3,7 @@ Firebase Jekyll Comments
 
 [Jekyll](http://jekyllrb.com/) is the coolest static-everything blogging platform out there, but if you came from a more dynamic blogging platform, you probably miss comments. I know I do. 
 
-![unsocial blogging](docs/forever-alone.png)
+![unsocial blogging](docs/forever_alone.png)
 
 Anyway, here's a handy dandy include for Jekyll that adds real time comments to your blog without any backend code. The backend part is handled by [Firebase](https://firebase.com)
 
