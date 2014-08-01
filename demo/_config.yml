@@ -1,0 +1,17 @@
+# Site settings
+title: Your awesome title
+email: your-email@domain.com
+description: "Write an awesome description for your new site here. You can edit this line in _config.yml. It will appear in your document head meta (for Google search results) and in your feed.xml site description."
+baseurl: ""
+url: "http://yourdomain.com"
+twitter_username: jekyllrb
+github_username:  jekyll
+
+# Build settings
+markdown: kramdown
+permalink: pretty
+
+# firebase-jekyll-comments stuff
+fbc-comments-firebase: https://jekyll-comments-demo.firebaseio.com/
+fbc-default-picture: http://example.com/image.jpg
+fbc-default-link: http://example.com

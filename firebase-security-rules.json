@@ -20,17 +20,18 @@
             "uid": {
               ".validate": "newData.exists()"
             },
-            "$other": { ".validate": false }
+            "$other": {
+              ".validate": false
+            }
           }
         }
       },
-          "users": {
-      "$uid": {
-        ".write": "auth.uid == newData.val()",
-        ".validate": "newData.hasChild('uid')"
+      "users": {
+        "$uid": {
+          ".write": "auth.uid == newData.val()",
+          ".validate": "newData.hasChild('uid')"
         }
-    },
-    "$other": { ".validate": false }
+      }
     }
   }
 }
