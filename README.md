@@ -11,7 +11,7 @@ Firebase Jekyll Comments
 
 Anyway, here's a handy dandy include for Jekyll that adds real time comments to your blog without any backend code. The backend part is handled by [Firebase](https://firebase.com)
 
-Interested? Check out a [live demo](https://jekyll-commetns-demo.firebaseapp.com).
+Interested? Check out a [live demo](https://jekyll-comments-demo.firebaseapp.com).
 
 ## Setup
 
