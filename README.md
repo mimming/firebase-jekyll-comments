@@ -3,11 +3,15 @@ Firebase Jekyll Comments
 
 [Jekyll](http://jekyllrb.com/) is the coolest static-everything blogging platform out there, but if you came from a more dynamic blogging platform, you probably miss comments. I know I do. 
 
-![unsocial blogging](docs/forever_alone.png)
+### Unsocial Blogging
+![unsocial blogging](docs/forever-alone.png)
+
+### Solution
+![firebase jekyll](docs/firebase-jekyll.png)
 
 Anyway, here's a handy dandy include for Jekyll that adds real time comments to your blog without any backend code. The backend part is handled by [Firebase](https://firebase.com)
 
-Interested? Check out a [live demo on dinopacks.com](http://dinopacks.com).
+Interested? Check out a [live demo](https://jekyll-commetns-demo.firebaseapp.com).
 
 ## Setup
 
@@ -19,10 +23,10 @@ Interested? Check out a [live demo on dinopacks.com](http://dinopacks.com).
    - `fbc-comments-firebase` - The URL of the Firebase to host your comments, e.g. https://myawesomeblog-comments.firebaseio.com/
    - `fbc-default-picture` - The URL of a picture to represent users who don't have one for some reason
    - `fbc-default-link` - Same deal as above, but for users who have no profile for one reason or another
-4. `_includes/firebase-comment-form-template.html` represents your comments form. Edit it to match your blog.
+4. [`_includes/firebase-comment-form-template.html`](_includes/firebase-comment-form-template.html) represents your comments form. Edit it to match your blog.
    - Use the same markup as the rest of your blog. Jekyll interprets it like any other include at build time. 
    - Preserve the `fbc-*` element ids. They are required by the plugin to function.
-5. `_includes/firebase-comment-template.html` represents an individual comment. Edit it to match your blog.
+5. [`_includes/firebase-comment-template.html`](includes/firebase-comment-template.html) represents an individual comment. Edit it to match your blog.
    - Use the same markup as the rest of your blog. Jekyll interprets it like any other include at build time.
    - It is further processed with a JavaScript template engine at the time of rendering. Use these template tags:
        - `<%=link %>` - Commenter's profile URL
