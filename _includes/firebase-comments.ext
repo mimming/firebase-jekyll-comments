@@ -5,10 +5,10 @@
   //TODO: consider upgrading to something real like handlebar.js
   // Simple JavaScript Templating
   // John Resig - http://ejohn.org/ - MIT Licensed
-  (function(){
+  (function () {
     var cache = {};
 
-    this.tmpl = function tmpl(str, data){
+    this.tmpl = function tmpl(str, data) {
       // Figure out if we're getting a template, or if we need to
       // load the template - and be sure to cache the result.
       var fn = !/\W/.test(str) ?
@@ -35,19 +35,24 @@
                   + "');}return p.join('');");
 
       // Provide some basic currying to the user
-      return data ? fn( data ) : fn;
+      return data ? fn(data) : fn;
     };
   })();
 </script>
 <script>
   $(document).ready(function () {
     // Load up useful information from site and page variables
-    var firebase = "{{site.comments-firebase}}";
-    var postId = "{{page.id || default | replace '/','-'}}";
+    var firebase = "{{site.fbc-comments-firebase}}";
+    var postId = "{{page.id || default}}";
     var blogName = "{{site.name || default}}";
+    var defaultPicture = "{{site.fbc-default-picture}}";
+    var defaultLink = "{{site.fbc-default-link}}";
+
+    // Sanitize the Firebase keys, since Jekyll allows more possible characters
+    postId = postId.replace(/[\.\/\$\[\]\x7F\x00-\x1F]/g, "-");
 
     var fb = new Firebase(firebase + blogName);
-    var fbPostComments = fb.child(postId);
+    var fbPostComments = fb.child("posts/" + postId);
     var fbPostCommentCount = fb.child("comment-counts/" + postId);
 
     var currentUser = null;
@@ -58,20 +63,42 @@
         // An error occurred while attempting login
         console.log(error);
       } else if (user) {
-        currentUser = user;
-        // User authenticated with Firebase
-
-        // Store user data in Firebase so we can display it on the comments
-        fb.child('users').child(user.uid).set({
-          displayName: user.displayName,
+        // Expand the user object to include profile photo and url
+        currentUser = {
+          uid: user.uid,
           provider: user.provider,
-          provider_id: user.id
-        });
-        //TODO: Get profile photo
-        //TODO: get profile URL
+          displayName: user.displayName
+        };
+
+        // Normalize the pictures and links across services
+        switch (user.provider) {
+          case "google":
+            currentUser.picture = user.thirdPartyUserData.picture;
+            currentUser.link = user.thirdPartyUserData.link;
+            break;
+          case "facebook":
+            currentUser.picture = user.thirdPartyUserData.picture.data.url;
+            currentUser.link = user.thirdPartyUserData.link;
+            break;
+          case "twitter":
+            currentUser.picture = user.thirdPartyUserData.profile_image_url;
+            currentUser.link = "http://twitter.com/" + user.thirdPartyUserData.screen_name;
+            break;
+          case "github":
+            currentUser.picture = user.thirdPartyUserData.avatar_url;
+            currentUser.link = user.thirdPartyUserData.html_url;
+            break;
+          default:
+            console.log("unknown user provider " + user.provider);
+        }
+
+        // User authenticated with Firebase
+        // Store user data in Firebase so we can display it on the comments
+        fb.child('users').child(currentUser.uid).set(currentUser);
 
         $("#fbc-login-buttons").hide();
         $("#fbc-comment-form").show();
+
       } else {
         // User is logged out
         currentUser = null;
@@ -96,6 +123,10 @@
     $('#fbc-login-github').click(function (event) {
       auth.login('github', { rememberMe: true });
     });
+    $('#fbc-login-twitter').click(function (event) {
+      auth.login('twitter', { rememberMe: true });
+    });
+
 
     $('#fbc-logout').click(function (event) {
       auth.logout();
@@ -103,16 +134,24 @@
 
     // Handle insertions
     $('#fbc-comment-form-submit').click(function (event) {
+      // Disable the button to prevent re-submissions
+      $('#fbc-comment-form-submit').prop('disabled', true);
+      // Get the comment
       var comment = $("#fbc-comment-message").val();
+      // Empty the text area to prevent re-submissions
+      $('#fbc-comment-message').val('');
+      // re-enable the submit button
+      $('#fbc-comment-form-submit').prop('disabled', false);
 
-      //Strip the html for XSS protection
-      // TODO: (also enforce this on the database)
-      //TODO: there has to be a cleaner way to do this
-      var cleanComment = $("<div/>").html(comment).text();
-      fbPostComments.push({'uid': currentUser.uid, 'comment': comment});
-
-      fbPostCommentCount.transaction(function (current_value) {
-        return (current_value || 0) + 1;
+      fbPostComments.push({'uid': currentUser.uid, 'comment': comment}, function (error) {
+        if (error != null) {
+          alert(error.message + " Stop screwing around!")
+        } else {
+          // Comment was posted. Increment the comment count
+          fbPostCommentCount.transaction(function (current_value) {
+            return (current_value || 0) + 1;
+          });
+        }
       });
     });
 
@@ -120,28 +159,23 @@
     fbPostComments.on('child_added', function (snapshot) {
       var message = snapshot.val();
       var messageComment = message.comment;
-      // TODO: Replace newlines with line breaks
-      messageComment = messageComment.replace(/\n/g, "<br />");
+      //Replace newlines with line breaks
+      messageComment = messageComment.replace(/[\n\r]/g, "<br />");
 
       fb.child("users/" + message.uid).once('value', function (userSnap) {
         var user = userSnap.val();
-        var userName = user ? user.displayName : "anonymous";
-        var profileImageUrl = "https://lh4.googleusercontent.com/-yth5HLY4Qi4/AAAAAAAAAAI/AAAAAAADCvU/hXAqMsRa8rA/photo.jpg?sz=50";
-        var profileUrl = "http://google.com/+JennyMurphy";
-
 
         // this is not working with an id reference to a template (possibly because it's 6 year old code), so give it the html instead
         var commentHtml = tmpl($("#fbc-comment-template").html(), {
           comment: messageComment,
-          userName: userName,
-          profileImageUrl: profileImageUrl,
-          profileUrl: profileUrl
+          displayName: user ? user.displayName : "anonymous",
+          picture: user ? user.picture : defaultPicture,
+          link: user ? user.link : defaultLink
         });
 
         $("#fbc-comments-list").append(commentHtml);
       })
     });
-
   });
 </script>
 <script type="application/vnd.fbc-template" id="fbc-comment-template">
