@@ -1,0 +1,36 @@
+{
+  "rules": {
+    ".read": true,
+    ".write": "auth != null",
+    "$blogs": {
+      "comment-counts": {
+        "$post": {
+          ".validate": "newData.isNumber()"
+        }
+      },
+      "posts": {
+        "$post": {
+          "$commentId": {
+            ".write": "auth.uid === newData.child('uid').val() && !data.exists() && newData.exists()",
+            ".validate": "newData.hasChildren(['comment', 'uid'])",
+            "comment": {
+              // Really crude XSS evasion
+              ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length < 2000 && newData.val().contains('>') == false && newData.val().contains('<') == false"
+            },
+            "uid": {
+              ".validate": "newData.exists()"
+            },
+            "$other": { ".validate": false }
+          }
+        }
+      },
+          "users": {
+      "$uid": {
+        ".write": "auth.uid == newData.val()",
+        ".validate": "newData.hasChild('uid')"
+        }
+    },
+    "$other": { ".validate": false }
+    }
+  }
+}

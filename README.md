@@ -12,6 +12,8 @@ Interested? Check out a [live demo on dinopacks.com](http://dinopacks.com).
 ## Setup
 
 1. Create a [new Firebase](https://www.firebase.com/account/) for your blog comments.
+1. Paste the contents of [`firebase-security-rules.json`](firebase-security-rules.json) into the
+   [security rules](https://www.firebase.com/docs/security/guide.html) pane for your Firebase.
 1. Copy the files from [_includes](/mimming/firebase-blog-comments/tree/master/_includes) into the `_includes` folder in the root of your blog. Create the directory if it does not already exist.
 2. Edit your `_config.yaml` and specify three new properties:
    - `fbc-comments-firebase` - The URL of the Firebase to host your comments, e.g. https://myawesomeblog-comments.firebaseio.com/
@@ -21,7 +23,7 @@ Interested? Check out a [live demo on dinopacks.com](http://dinopacks.com).
    - Use the same markup as the rest of your blog. Jekyll interprets it like any other include at build time. 
    - Preserve the `fbc-*` element ids. They are required by the plugin to function.
 5. `_includes/firebase-comment-template.html` represents an individual comment. Edit it to match your blog.
-   - Use the same markup as the rest of your blog. Jekyll interprets it like any other include at build time. 
+   - Use the same markup as the rest of your blog. Jekyll interprets it like any other include at build time.
    - It is further processed with a JavaScript template engine at the time of rendering. Use these template tags:
        - `<%=link %>` - Commenter's profile URL
        - `<%=picture %>` - The beautiful mug shot of your commenter
@@ -31,4 +33,3 @@ Interested? Check out a [live demo on dinopacks.com](http://dinopacks.com).
 7. Add the include to the appropriate layout files.
 
         {% include firebase-comments.ext %}
-
