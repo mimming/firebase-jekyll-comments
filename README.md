@@ -3,10 +3,8 @@ Firebase Jekyll Comments
 
 [Jekyll](http://jekyllrb.com/) is the coolest static-everything blogging platform out there, but if you came from a more dynamic blogging platform, you probably miss comments. I know I do. 
 
-<h3 style="float: left;">Unsocial Blogging</h3>
 <img style="float: left;" src="https://github.com/mimming/firebase-jekyll-comments/raw/master/docs/forever-alone.png">
 
-<h3 style="float: right;">The Solution</h3>
 <img style="float: right;" src="https://github.com/mimming/firebase-jekyll-comments/raw/master/docs/firebase-jekyll.png">
 
 <div style="clear: both;">
