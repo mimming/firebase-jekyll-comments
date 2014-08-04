@@ -2,7 +2,7 @@
 <script src='https://ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js'></script>
 <script src="https://cdn.firebase.com/js/simple-login/1.6.2/firebase-simple-login.js"></script>
 <script>
-  //TODO: consider upgrading to something real like handlebar.js
+  //TODO: consider upgrading to something real like handlebar.js, but not handlebar since it conflicts with Jekyll's liquid templates
   // Simple JavaScript Templating
   // John Resig - http://ejohn.org/ - MIT Licensed
   (function () {
@@ -45,11 +45,9 @@
     var firebase = "{{site.fbc-comments-firebase}}";
     var postId = "{{page.id || default}}";
     var blogName = "{{site.name || default}}";
-    var defaultPicture = "{{site.fbc-default-picture}}";
-    var defaultLink = "{{site.fbc-default-link}}";
 
     // Sanitize the Firebase keys, since Jekyll allows more possible characters
-    postId = postId.replace(/[\.\/\$\[\]\x7F\x00-\x1F]/g, "-");
+    postId = sanitizeFirebaseKey(postId);
 
     var fb = new Firebase(firebase + blogName);
     var fbPostComments = fb.child("posts/" + postId);
@@ -109,24 +107,10 @@
     });
 
     // Handle login
-    $('#fbc-login-google').click(function (event) {
-      auth.login('google', {
-        rememberMe: true,
-        scope: 'https://www.googleapis.com/auth/plus.login'
-      });
+    $('#fbc-login-buttons button').click(function (event) {
+      var provider = $(this).data("auth-provider");
+      auth.login(provider, { rememberMe: true });
     });
-
-    $('#fbc-login-facebook').click(function (event) {
-      auth.login('facebook', { rememberMe: true });
-    });
-
-    $('#fbc-login-github').click(function (event) {
-      auth.login('github', { rememberMe: true });
-    });
-    $('#fbc-login-twitter').click(function (event) {
-      auth.login('twitter', { rememberMe: true });
-    });
-
 
     $('#fbc-logout').click(function (event) {
       auth.logout();
@@ -159,27 +143,39 @@
     fbPostComments.on('child_added', function (snapshot) {
       var message = snapshot.val();
       var messageComment = message.comment;
-      //Replace newlines with line breaks
-      messageComment = messageComment.replace(/[\n\r]/g, "<br />");
 
       fb.child("users/" + message.uid).once('value', function (userSnap) {
         var user = userSnap.val();
 
         // this is not working with an id reference to a template (possibly because it's 6 year old code), so give it the html instead
         var commentHtml = tmpl($("#fbc-comment-template").html(), {
-          comment: messageComment,
-          displayName: user ? user.displayName : "anonymous",
-          picture: user ? user.picture : defaultPicture,
-          link: user ? user.link : defaultLink
+          comment: scrubComment(messageComment),
+          displayName: scrubComment(user.displayName),
+          picture: scrubComment(user.picture),
+          link: scrubComment(user.link)
         });
 
         $("#fbc-comments-list").append(commentHtml);
       })
     });
+    fbPostCommentCount.on('child_changed', function (snapshot) {
+      $("#fbc-comment-count").text(snapshot.val());
+    });
   });
+
+  // Scrub user generated input before displaying
+  function scrubComment(value){
+    // prevent XSS
+    var escaped = $('<div/>').text(value).html();
+    //Replace newlines with line breaks
+    return escaped.replace(/[\n\r]/g, "<br />");
+  }
+
+  function sanitizeFirebaseKey(key) {
+    return key.replace(/[\.\/\$\[\]\x7F\x00-\x1F]/g, "-");
+  }
 </script>
 <script type="application/vnd.fbc-template" id="fbc-comment-template">
   {% include firebase-comment-template.html %}
 </script>
-
 {% include firebase-comment-form-template.html %}

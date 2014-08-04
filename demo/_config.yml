@@ -13,5 +13,3 @@ permalink: pretty
 
 # firebase-jekyll-comments stuff
 fbc-comments-firebase: https://jekyll-comments-demo.firebaseio.com/
-fbc-default-picture: http://example.com/image.jpg
-fbc-default-link: http://example.com

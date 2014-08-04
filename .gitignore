@@ -1,2 +1,5 @@
 .idea
 *iml
+demo/_includes/firebase-comment-form-template.html
+demo/_includes/firebase-comment-template.html
+demo/_includes/firebase-comments.ext

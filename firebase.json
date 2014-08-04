@@ -1,6 +1,6 @@
 {
   "firebase": "jekyll-comments-demo",
-  "public": ".",
+  "public": "./demo/_site",
   "ignore": [
     "firebase.json",
     "**/.*",
