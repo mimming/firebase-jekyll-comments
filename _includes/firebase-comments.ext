@@ -158,7 +158,7 @@
         $("#fbc-comments-list").append(commentHtml);
       })
     });
-    fbPostCommentCount.on('child_changed', function (snapshot) {
+    fbPostCommentCount.on('value', function (snapshot) {
       $("#fbc-comment-count").text(snapshot.val());
     });
   });
