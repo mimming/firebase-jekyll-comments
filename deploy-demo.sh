@@ -7,5 +7,5 @@ rsync -vaz ./_includes/* ./demo/_includes
 pushd demo
 jekyll build
 popd
-firbase deploy
+firebase deploy
 popd
