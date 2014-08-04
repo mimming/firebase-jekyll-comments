@@ -14,8 +14,7 @@
             ".write": "auth.uid === newData.child('uid').val() && !data.exists() && newData.exists()",
             ".validate": "newData.hasChildren(['comment', 'uid'])",
             "comment": {
-              // Really crude XSS evasion
-              ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length < 2000 && newData.val().contains('>') == false && newData.val().contains('<') == false"
+              ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length < 2000"
             },
             "uid": {
               ".validate": "newData.exists()"

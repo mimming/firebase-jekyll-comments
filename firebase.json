@@ -1,0 +1,10 @@
+{
+  "firebase": "jekyll-comments-demo",
+  "public": ".",
+  "ignore": [
+    "firebase.json",
+    "**/.*",
+    "**/node_modules/**"
+  ],
+  "rules": "firebase-security-rules.json"
+}
