@@ -1,10 +1,10 @@
 {
   "rules": {
     ".read": true,
-    ".write": "auth != null",
     "$blogs": {
       "comment-counts": {
         "$post": {
+          ".write": "auth != null",
           ".validate": "newData.isNumber()"
         }
       },
