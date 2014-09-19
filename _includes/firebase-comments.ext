@@ -163,7 +163,8 @@
           comment: messageComment, // no need to scrub again, already done on post!
           displayName: scrubComment(user.displayName),
           picture: scrubComment(user.picture),
-          link: scrubComment(user.link)
+          link: scrubComment(user.link),
+          time: scrubComment(messageTime)
         });
 
         $("#fbc-comments-list").append(commentHtml);
