@@ -152,6 +152,8 @@
     fbPostComments.on('child_added', function (snapshot) {
       var message = snapshot.val();
       var messageComment = message.comment;
+      var messageTime = new Date(message.time).toLocaleDateString();
+      if (messageTime == "Invalid Date"){messageTime = "¯\\_(ツ)_/¯";} // legacy support
 
       fb.child("users/" + message.uid).once('value', function (userSnap) {
         var user = userSnap.val();
